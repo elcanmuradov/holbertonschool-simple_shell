@@ -34,7 +34,9 @@ void execute_command(char *cmd, char *argv0)
 {
 pid_t pid;
 int status;
-char *argv[] = {cmd, NULL};
+char *argv[2];
+argv[0] = cmd;
+argv[1] = NULL;
 
 pid = fork();
 if (pid == -1)
