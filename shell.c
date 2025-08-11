@@ -17,6 +17,7 @@ char *read_command(void)
 char *cmd = NULL;
 size_t len = 0;
 ssize_t n;
+int start = 0, end = 0;
 
 n = getline(&cmd, &len, stdin);
 if (n == -1)
@@ -26,6 +27,22 @@ return (NULL);
 }
 if (n > 0 && cmd[n - 1] == '\n')
 cmd[n - 1] = '\0';
+
+while (start < n && (cmd[start] == ' ' || cmd[start] == '\t'))
+start++;
+
+end = n - 1;
+while (end >= start && (cmd[end] == ' ' || cmd[end] == '\t'))
+end--;
+
+if (start > end)
+{
+free(cmd);
+return (NULL);
+}
+
+cmd = memmove(cmd, cmd + start, end - start + 1);
+cmd[end - start + 1] = '\0';
 
 return (cmd);
 }
