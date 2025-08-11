@@ -31,6 +31,12 @@ cmd[n - 1] = '\0';
 while (start < n && (cmd[start] == ' ' || cmd[start] == '\t'))
 start++;
 
+if (start == n)
+{
+free(cmd);
+return (NULL);
+}
+
 end = n - 1;
 while (end >= start && (cmd[end] == ' ' || cmd[end] == '\t'))
 end--;
