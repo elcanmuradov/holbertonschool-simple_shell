@@ -76,7 +76,6 @@ waitpid(pid, &status, WUNTRACED);
 int main(int argc, char *argv[])
 {
 char *command;
-char *prompt = "($) ";
 const char *exit_cmd = "exit";
 int interactive = isatty(STDIN_FILENO);
 (void)argc;
