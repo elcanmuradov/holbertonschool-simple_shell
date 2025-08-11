@@ -1,0 +1,93 @@
+.TH SIMPLE_SHELL 1 "August 2025" "1.0" "Simple Shell Manual"
+
+.SH NAME
+.B simple_shell
+\- simple UNIX command interpreter
+
+.SH SYNOPSIS
+.B hsh
+.RI [ command_string ]
+
+.SH DESCRIPTION
+.B Simple Shell
+is a command line interpreter that executes commands read from the standard input or from a file. It is designed to be a simplified version of the UNIX shell.
+
+.SH OVERVIEW
+The simple shell is a command that reads lines from either a file or the terminal, interprets them, and generally executes other commands. It incorporates many features to aid interactive use and has the advantage that the interpretative language is common to both interactive and non-interactive use.
+
+.SH INVOCATION
+The shell can be invoked in two modes:
+
+.B Interactive Mode:
+When invoked without any arguments, the shell displays a prompt and waits for user input.
+
+.B Non-Interactive Mode:
+Commands can be piped to the shell or provided via redirection.
+
+.SH COMMAND EXECUTION
+Commands are executed by searching for the command name in the directories listed in the PATH environment variable. If the command name contains a slash (/), it is executed directly without PATH search.
+
+.SH BUILT-IN COMMANDS
+The following commands are built into the shell:
+
+.B cd [directory]
+.RS
+Change the current working directory. If no directory is specified, change to the HOME directory.
+.RE
+
+.B exit [status]
+.RS
+Terminate the shell. If status is specified, exit with that status code.
+.RE
+
+.B env
+.RS
+Print the current environment variables.
+.RE
+
+.SH VARIABLES
+The shell uses the following environment variables:
+
+.B PATH
+.RS
+A colon-separated list of directories to search for commands.
+.RE
+
+.B HOME
+.RS
+The home directory of the current user.
+.RE
+
+.SH EXIT STATUS
+The shell exits with the status of the last command executed. Built-in commands that encounter errors return appropriate exit statuses.
+
+.SH EXAMPLES
+.nf
+$ ./hsh
+($) /bin/ls -l
+total 8
+-rwxr-xr-x 1 user user 8760 Aug 11 10:30 hsh
+($) pwd
+/home/user/simple_shell
+($) exit
+$
+
+$ echo "pwd" | ./hsh
+/home/user/simple_shell
+.fi
+
+.SH AUTHORS
+Written by [Your Name] as part of the Holberton School Simple Shell project.
+
+.SH SEE ALSO
+.BR sh (1),
+.BR bash (1),
+.BR execve (2),
+.BR fork (2),
+.BR wait (2)
+
+.SH BUGS
+No known bugs at this time.
+
+.SH COPYRIGHT
+This is free software; see the source for copying conditions.
