@@ -5,18 +5,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/stat.h>
-#include <errno.h>
+#include <signal.h>
 
-#define PROMPT "#cisfun$ "
-#define MAX_LINE 1024
-
-extern char **environ;
-
-void shell_loop(void);
-char *read_line(void);
-int execute_command(char *command);
-void print_error(char *command);
+void display_prompt(void);
+char *read_command(void);
+void execute_command(char *cmd, char *argv0);
 
 #endif /* SHELL_H */
