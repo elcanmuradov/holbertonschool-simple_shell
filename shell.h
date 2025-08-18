@@ -14,5 +14,7 @@ extern char **environ;
 void print_prompt(void);
 char *read_command(void);
 void execute_command(char *command, char *prog_name);
+char *trim_whitespace(char *str);
+
 
 #endif /* SHELL_H */

@@ -8,7 +8,24 @@ void print_prompt(void)
 if (isatty(STDIN_FILENO))
 printf("($) ");
 }
-
+/**
+ * trim_whitespace - removes leading and trailing whitespace from string
+ * @str: string to trim
+ * Return: pointer to trimmed string
+ */
+char *trim_whitespace(char *str)
+{
+char *end;
+while (*str == ' ' || *str == '\t')
+str++;
+if (*str == '\0')
+return (str);
+end = str + strlen(str) - 1;
+while (end > str && (*end == ' ' || *end == '\t'))
+end--;
+*(end + 1) = '\0';
+return (str);
+}
 /**
  * read_command - reads a command from stdin
  * Return: the command string or NULL on EOF
