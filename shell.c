@@ -8,24 +8,35 @@ void print_prompt(void)
 if (isatty(STDIN_FILENO))
 printf("($) ");
 }
+
 /**
  * trim_whitespace - removes leading and trailing whitespace from string
  * @str: string to trim
- * Return: pointer to trimmed string
+ * Return: pointer to trimmed string (modifies original)
  */
 char *trim_whitespace(char *str)
 {
+char *start = str;
 char *end;
-while (*str == ' ' || *str == '\t')
-str++;
-if (*str == '\0')
-return (str);
-end = str + strlen(str) - 1;
-while (end > str && (*end == ' ' || *end == '\t'))
-end--;
-*(end + 1) = '\0';
+while (*start == ' ' || *start == '\t' || *start == '\n' || *start == '\r')
+start++;
+if (*start == '\0')
+{
+*str = '\0';
 return (str);
 }
+end = start + strlen(start) - 1;
+while (end > start && (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r'))
+end--;
+*(end + 1) = '\0';
+if (start != str)
+{
+memmove(str, start, strlen(start) + 1);
+}
+
+return (str);
+}
+
 /**
  * read_command - reads a command from stdin
  * Return: the command string or NULL on EOF
@@ -35,6 +46,7 @@ char *read_command(void)
 char *line = NULL;
 size_t len = 0;
 ssize_t nread;
+
 nread = getline(&line, &len, stdin);
 if (nread == -1)
 {
@@ -43,6 +55,7 @@ return (NULL);
 }
 if (line[nread - 1] == '\n')
 line[nread - 1] = '\0';
+
 return (line);
 }
 
@@ -56,6 +69,7 @@ void execute_command(char *command, char *prog_name)
 pid_t pid;
 int status;
 struct stat st;
+trim_whitespace(command);
 if (command[0] == '\0')
 return;
 if (stat(command, &st) == -1)
@@ -63,11 +77,13 @@ if (stat(command, &st) == -1)
 fprintf(stderr, "%s: 1: %s: not found\n", prog_name, command);
 return;
 }
+
 if (!(st.st_mode & S_IXUSR))
 {
 fprintf(stderr, "%s: 1: %s: Permission denied\n", prog_name, command);
 return;
 }
+
 pid = fork();
 if (pid == -1)
 {
@@ -77,9 +93,7 @@ return;
 
 if (pid == 0)
 {
-char *argv[2];
-argv[0] = command;
-argv[1] = NULL;
+char *argv[] = {command, NULL};
 execve(command, argv, environ);
 perror("execve");
 _exit(127);
