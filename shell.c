@@ -60,7 +60,9 @@ return;
 
 if (pid == 0)
 {
-char *argv[] = {command, NULL};
+char *argv[2];
+argv[0] = command;
+argv[1] = NULL;
 execve(command, argv, environ);
 perror("execve");
 _exit(127);
