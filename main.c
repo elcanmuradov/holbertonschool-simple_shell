@@ -12,7 +12,6 @@ char *command;
 char *prog_name = argv[0];
 
 (void)argc;
-
 while (1)
 {
 print_prompt();
@@ -24,7 +23,7 @@ if (isatty(STDIN_FILENO))
 printf("\n");
 break;
 }
-if (strlen(command) == 0)
+if (strlen(trim_whitespace(command)) == 0)
 {
 free(command);
 continue;
