@@ -61,6 +61,8 @@ int status;
 struct stat st;
 char **argv;
 char *command_copy;
+char *token;
+int i = 0;
 
 trim_whitespace(command);
 
@@ -72,15 +74,28 @@ if (command_copy == NULL)
 return;
 strcpy(command_copy, command);
 
-argv = malloc(sizeof(char *) * 2);
+argv = malloc(sizeof(char *) * 64);
 if (argv == NULL)
 {
 free(command_copy);
 return;
 }
 
-argv[0] = command_copy;
-argv[1] = NULL;
+token = strtok(command_copy, " \t");
+while (token != NULL && i < 63)
+{
+argv[i] = token;
+token = strtok(NULL, " \t");
+i++;
+}
+argv[i] = NULL;
+
+if (argv[0] == NULL)
+{
+free(argv);
+free(command_copy);
+return;
+}
 
 if (stat(argv[0], &st) == -1)
 {
