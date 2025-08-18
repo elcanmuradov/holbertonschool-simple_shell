@@ -1,119 +1,72 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <signal.h>
+#include "shell.h"
 
-extern char **environ;
-
-void display_prompt(void)
+/**
+ * print_prompt - prints the shell prompt
+ */
+void print_prompt(void)
 {
-write(STDOUT_FILENO, "($) ", 4);
+if (isatty(STDIN_FILENO))
+printf("($) ");
 }
 
+/**
+ * read_command - reads a command from stdin
+ * Return: the command string or NULL on EOF
+ */
 char *read_command(void)
 {
-char *cmd = NULL;
+char *line = NULL;
 size_t len = 0;
-ssize_t n;
-int start = 0, end = 0;
-
-n = getline(&cmd, &len, stdin);
-if (n == -1)
+ssize_t nread;
+nread = getline(&line, &len, stdin);
+if (nread == -1)
 {
-free(cmd);
+free(line);
 return (NULL);
 }
-if (n > 0 && cmd[n - 1] == '\n')
-cmd[n - 1] = '\0';
-
-while (start < n && (cmd[start] == ' ' || cmd[start] == '\t'))
-start++;
-
-if (start == n)
-{
-free(cmd);
-return (NULL);
+if (line[nread - 1] == '\n')
+line[nread - 1] = '\0';
+return (line);
 }
 
-end = n - 1;
-while (end >= start && (cmd[end] == ' ' || cmd[end] == '\t'))
-end--;
-
-if (start > end)
-{
-free(cmd);
-return (NULL);
-}
-
-cmd = memmove(cmd, cmd + start, end - start + 1);
-cmd[end - start + 1] = '\0';
-
-return (cmd);
-}
-
-void execute_command(char *cmd, char *argv0)
+/**
+ * execute_command - executes a command
+ * @command: the command to execute
+ * @prog_name: name of the shell program for error messages
+ */
+void execute_command(char *command, char *prog_name)
 {
 pid_t pid;
 int status;
-char *argv[2];
-argv[0] = cmd;
-argv[1] = NULL;
-
+struct stat st;
+if (command[0] == '\0')
+return;
+if (stat(command, &st) == -1)
+{
+fprintf(stderr, "%s: 1: %s: not found\n", prog_name, command);
+return;
+}
+if (!(st.st_mode & S_IXUSR))
+{
+fprintf(stderr, "%s: 1: %s: Permission denied\n", prog_name, command);
+return;
+}
 pid = fork();
 if (pid == -1)
 {
 perror("fork");
-exit(EXIT_FAILURE);
+return;
 }
 
 if (pid == 0)
 {
-execve(cmd, argv, environ);
-fprintf(stderr, "%s: 1: %s: not found\n", argv0, cmd);
-exit(127);
+char *argv[] = {command, NULL};
+execve(command, argv, environ);
+perror("execve");
+_exit(127);
 }
-
-do {
-waitpid(pid, &status, WUNTRACED);
-} while (!WIFEXITED(status) && !WIFSIGNALED(status));
-}
-
-int main(int argc, char *argv[])
+else
 {
-char *command;
-int interactive = isatty(STDIN_FILENO);
-
-(void)argc;
-
-signal(SIGINT, SIG_IGN);
-
-while (1)
-{
-if (interactive)
-{
-display_prompt();
-fflush(stdout);
+wait(&status);
 }
-
-command = read_command();
-if (!command)
-{
-if (interactive)
-write(STDOUT_FILENO, "\n", 1);
-break;
-}
-
-if (strcmp(command, "exit") == 0)
-{
-free(command);
-break;
-}
-
-execute_command(command, argv[0]);
-free(command);
-}
-
-return (0);
 }

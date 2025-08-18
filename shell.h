@@ -3,14 +3,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <sys/types.h>
+#include <unistd.h>
 #include <sys/wait.h>
-#include <signal.h>
+#include <sys/stat.h>
+#include <errno.h>
 
-void display_prompt(void);
+extern char **environ;
+
+void print_prompt(void);
 char *read_command(void);
-void execute_command(char *cmd, char *argv0);
+void execute_command(char *command, char *prog_name);
 
 #endif /* SHELL_H */
