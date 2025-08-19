@@ -18,7 +18,7 @@ start++;
 if (*start == '\0')
 {
 *str = '\0';
-return (str);
+return str;
 }
 
 end = start + strlen(start) - 1;
@@ -28,11 +28,9 @@ end--;
 *(end + 1) = '\0';
 
 if (start != str)
-{
 memmove(str, start, strlen(start) + 1);
-}
 
-return (str);
+return str;
 }
 
 char *read_command(void)
@@ -45,70 +43,77 @@ nread = getline(&line, &len, stdin);
 if (nread == -1)
 {
 free(line);
-return (NULL);
+return NULL;
 }
 
 if (nread > 0 && line[nread - 1] == '\n')
 line[nread - 1] = '\0';
 
-return (line);
+return line;
+}
+
+char **split_line(char *line)
+{
+char **tokens;
+char *token;
+int bufsize = 64, i = 0;
+
+tokens = malloc(bufsize * sizeof(char*));
+if (!tokens)
+{
+perror("hsh");
+exit(EXIT_FAILURE);
+}
+
+token = strtok(line, " \t\r\n");
+while (token != NULL)
+{
+tokens[i] = token;
+i++;
+
+if (i >= bufsize)
+{
+bufsize += 64;
+tokens = realloc(tokens, bufsize * sizeof(char*));
+if (!tokens)
+{
+perror("hsh");
+exit(EXIT_FAILURE);
+}
+}
+}
+tokens[i] = NULL;
+return tokens;
 }
 
 void execute_command(char *command, char *prog_name)
 {
 pid_t pid;
 int status;
-struct stat st;
-char **argv;
+char **args;
 char *command_copy;
-char *token;
-int i = 0;
 
 trim_whitespace(command);
-
 if (command[0] == '\0')
 return;
 
-command_copy = malloc(strlen(command) + 1);
-if (command_copy == NULL)
+command_copy = strdup(command);
+if (!command_copy)
 return;
-strcpy(command_copy, command);
 
-argv = malloc(sizeof(char *) * 64);
-if (argv == NULL)
+args = split_line(command_copy);
+
+if (args[0] == NULL)
 {
+free(args);
 free(command_copy);
 return;
 }
 
-token = strtok(command_copy, " \t");
-while (token != NULL && i < 63)
+if (access(args[0], X_OK) != 0)
 {
-argv[i] = token;
-token = strtok(NULL, " \t");
-i++;
-}
-argv[i] = NULL;
-
-if (argv[0] == NULL)
-{
-free(argv);
-free(command_copy);
-return;
-}
-
-if (stat(argv[0], &st) == -1)
-{
-fprintf(stderr, "%s: 1: %s: not found\n", prog_name, argv[0]);
-free(argv);
-free(command_copy);
-return;
-}
-
-if (!(st.st_mode & S_IXUSR))
-{
-fprintf(stderr, "%s: 1: %s: Permission denied\n", prog_name, argv[0]);
-free(argv);
+fprintf(stderr, "%s: 1: %s: not found\n", prog_name, args[0]);
+free(args);
 free(command_copy);
 return;
 }
@@ -117,22 +122,26 @@ pid = fork();
 if (pid == -1)
 {
 perror("fork");
-free(argv);
+free(args);
 free(command_copy);
 return;
 }
 
 if (pid == 0)
 {
-execve(argv[0], argv, environ);
-perror("execve");
+execve(args[0], args, environ);
+fprintf(stderr, "%s: 1: %s: not found\n", prog_name, args[0]);
+free(args);
+free(command_copy);
 _exit(127);
 }
 else
 {
-wait(&status);
+do {
+waitpid(pid, &status, WUNTRACED);
+} while (!WIFEXITED(status) && !WIFSIGNALED(status));
 }
 
-free(argv);
+free(args);
 free(command_copy);
 }
