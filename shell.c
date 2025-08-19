@@ -1,5 +1,6 @@
 #include "shell.h"
 extern char **environ;
+
 void print_prompt(void)
 {
 if (isatty(STDIN_FILENO))
@@ -102,7 +103,6 @@ if (!command_copy)
 return;
 
 args = split_line(command_copy);
-
 if (args[0] == NULL)
 {
 free(args);
@@ -135,12 +135,10 @@ free(args);
 free(command_copy);
 _exit(127);
 }
-else
-{
+
 do {
 waitpid(pid, &status, WUNTRACED);
 } while (!WIFEXITED(status) && !WIFSIGNALED(status));
-}
 
 free(args);
 free(command_copy);
