@@ -1,11 +1,12 @@
 #include "shell.h"
-extern char **environ;
 
 void print_prompt(void)
 {
 if (isatty(STDIN_FILENO))
+{
 printf("($) ");
 fflush(stdout);
+}
 }
 
 char *trim_whitespace(char *str)
@@ -53,3 +54,37 @@ line[nread - 1] = '\0';
 return line;
 }
 
+char **parse_command(char *command)
+{
+int bufsize = 64;
+char **args = malloc(bufsize * sizeof(char*));
+char *token;
+int position = 0;
+
+if (!args)
+return NULL;
+
+token = strtok(command, " \t\r\n");
+while (token != NULL)
+{
+args[position] = token;
+position++;
+
+if (position >= bufsize)
+{
+bufsize += 64;
+char **temp = realloc(args, bufsize * sizeof(char*));
+if (!temp)
+{
+free(args);
+return NULL;
+}
+args = temp;
+}
+
+token = strtok(NULL, " \t\r\n");
+}
+args[position] = NULL;
+
+return args;
+}
