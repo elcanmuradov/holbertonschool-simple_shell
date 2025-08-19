@@ -63,7 +63,6 @@ tokens = malloc(bufsize * sizeof(char*));
 if (!tokens)
 {
 perror("hsh");
-exit(EXIT_FAILURE);
 }
 
 token = strtok(line, " \t\r\n");
