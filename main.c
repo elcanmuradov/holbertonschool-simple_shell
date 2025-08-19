@@ -4,23 +4,35 @@ void execute_command(char **args, char *prog_name)
 {
 pid_t pid;
 int status;
+char *command_path;
+
+command_path = find_command(args[0]);
+if (!command_path)
+{
+fprintf(stderr, "%s: 1: %s: not found\n", prog_name, args[0]);
+fflush(stderr);
+return;
+}
 
 pid = fork();
 if (pid == -1)
 {
 perror("fork");
+free(command_path);
 return;
 }
 
 if (pid == 0)
 {
-execve(args[0], args, environ);
+execve(command_path, args, environ);
 fprintf(stderr, "%s: 1: %s: not found\n", prog_name, args[0]);
 fflush(stderr);
+free(command_path);
 _exit(127);
 }
 else
 {
+free(command_path);
 do {
 waitpid(pid, &status, WUNTRACED);
 } while (!WIFEXITED(status) && !WIFSIGNALED(status));

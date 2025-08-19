@@ -1,3 +1,25 @@
+shell.h:
+
+#ifndef SHELL_H
+#define SHELL_H
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <signal.h>
+extern char **environ;
+void print_prompt(void);
+char *read_command(void);
+char *trim_whitespace(char *str);
+char **parse_command(char *command);
+void execute_command(char **args, char *prog_name);
+char *find_command(char *command);
+#endif
+
+shell.c:
+
 #include "shell.h"
 
 void print_prompt(void)
@@ -88,4 +110,60 @@ token = strtok(NULL, " \t\r\n");
 args[position] = NULL;
 
 return args;
+}
+
+char *find_command(char *command)
+{
+char *path_env;
+char *path_copy;
+char *dir;
+char *full_path;
+struct stat st;
+int path_len;
+int cmd_len;
+
+if (strchr(command, '/') != NULL)
+{
+if (stat(command, &st) == 0)
+return strdup(command);
+return NULL;
+}
+
+path_env = getenv("PATH");
+if (!path_env)
+return NULL;
+
+path_copy = strdup(path_env);
+if (!path_copy)
+return NULL;
+
+cmd_len = strlen(command);
+dir = strtok(path_copy, ":");
+
+while (dir != NULL)
+{
+path_len = strlen(dir);
+full_path = malloc(path_len + cmd_len + 2);
+if (!full_path)
+{
+free(path_copy);
+return NULL;
+}
+
+strcpy(full_path, dir);
+strcat(full_path, "/");
+strcat(full_path, command);
+
+if (stat(full_path, &st) == 0)
+{
+free(path_copy);
+return full_path;
+}
+
+free(full_path);
+dir = strtok(NULL, ":");
+}
+
+free(path_copy);
+return NULL;
 }
