@@ -1,5 +1,35 @@
 #include "shell.h"
 
+void execute_command(char **args, char *prog_name)
+{
+pid_t pid;
+int status;
+
+if (access(args[0], X_OK) != 0)
+{
+fprintf(stderr, "%s: 1: %s: not found\n", prog_name, args[0]);
+return;
+}
+
+pid = fork();
+if (pid == -1)
+{
+perror("fork");
+return;
+}
+
+if (pid == 0)
+{
+execve(args[0], args, environ);
+fprintf(stderr, "%s: 1: %s: not found\n", prog_name, args[0]);
+_exit(127);
+}
+
+do {
+waitpid(pid, &status, WUNTRACED);
+} while (!WIFEXITED(status) && !WIFSIGNALED(status));
+}
+
 int main(int argc, char **argv)
 {
 char *command;
@@ -66,7 +96,7 @@ free(command);
 continue;
 }
 
-execute_command(args, prog_name);  
+execute_command(args, prog_name);
 
 free(args);
 free(command);
