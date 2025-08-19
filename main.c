@@ -22,6 +22,7 @@ if (pid == 0)
 {
 execve(args[0], args, environ);
 fprintf(stderr, "%s: 1: %s: not found\n", prog_name, args[0]);
+fflush(stderr);
 _exit(127);
 }
 
