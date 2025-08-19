@@ -60,6 +60,7 @@ int bufsize = 64;
 char **args = malloc(bufsize * sizeof(char*));
 char *token;
 int position = 0;
+char **temp;
 
 if (!args)
 return NULL;
@@ -73,7 +74,7 @@ position++;
 if (position >= bufsize)
 {
 bufsize += 64;
-char **temp = realloc(args, bufsize * sizeof(char*));
+temp = realloc(args, bufsize * sizeof(char*));
 if (!temp)
 {
 free(args);
