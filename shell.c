@@ -99,6 +99,7 @@ char *full_path;
 struct stat st;
 int path_len;
 int cmd_len;
+int i;
 
 if (strchr(command, '/') != NULL)
 {
@@ -107,7 +108,16 @@ return strdup(command);
 return NULL;
 }
 
-path_env = getenv("PATH");
+path_env = NULL;
+for (i = 0; environ[i]; i++)
+{
+if (strncmp(environ[i], "PATH=", 5) == 0)
+{
+path_env = environ[i] + 5;
+break;
+}
+}
+
 if (!path_env)
 return NULL;
 
@@ -145,4 +155,3 @@ dir = strtok(NULL, ":");
 free(path_copy);
 return NULL;
 }
-
