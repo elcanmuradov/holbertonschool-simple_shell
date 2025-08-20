@@ -45,6 +45,7 @@ return 127;
 
 return 0;
 }
+
 int main(int argc, char **argv)
 {
 char *command;
@@ -89,14 +90,16 @@ free(command);
 continue;
 }
 
+if (strcmp(args[0], "exit") == 0)
+{
+free(args);
+free(command);
+exit(0);
+}
+
 status = execute_command(args, prog_name);
 free(args);
 free(command);
-
-if (!isatty(STDIN_FILENO))
-{
-exit(status);
-}
 }
 
 return 0;
