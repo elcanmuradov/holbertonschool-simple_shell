@@ -51,7 +51,6 @@ int main(int argc, char **argv)
 char *command;
 char *prog_name = argv[0];
 char **args;
-int status;
 
 (void)argc;
 signal(SIGINT, SIG_IGN);
