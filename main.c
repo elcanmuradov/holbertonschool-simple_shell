@@ -45,13 +45,12 @@ return 127;
 
 return 0;
 }
-
 int main(int argc, char **argv)
 {
 char *command;
 char *prog_name = argv[0];
 char **args;
-int status;
+
 (void)argc;
 signal(SIGINT, SIG_IGN);
 
@@ -96,7 +95,7 @@ free(command);
 exit(0);
 }
 
-status = execute_command(args, prog_name);
+execute_command(args, prog_name);
 free(args);
 free(command);
 }
