@@ -12,7 +12,7 @@ void print_prompt(void);
 char *read_command(void);
 char *trim_whitespace(char *str);
 char **parse_command(char *command);
-void execute_command(char **args, char *prog_name);
+int execute_command(char **args, char *prog_name);
 char *find_command(char *command);
 #endif
 
