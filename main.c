@@ -11,7 +11,7 @@ if (!command_path)
 {
 fprintf(stderr, "%s: 1: %s: not found\n", prog_name, args[0]);
 fflush(stderr);
-return;
+exit(127);
 }
 
 pid = fork();
