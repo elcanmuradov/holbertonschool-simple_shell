@@ -100,11 +100,17 @@ struct stat st;
 int path_len;
 int cmd_len;
 int i;
+char *result;
 
 if (strchr(command, '/') != NULL)
 {
 if (stat(command, &st) == 0)
-return strdup(command);
+{
+result = malloc(strlen(command) + 1);
+if (result)
+strcpy(result, command);
+return result;
+}
 return NULL;
 }
 
@@ -121,9 +127,10 @@ break;
 if (!path_env)
 return NULL;
 
-path_copy = strdup(path_env);
+path_copy = malloc(strlen(path_env) + 1);
 if (!path_copy)
 return NULL;
+strcpy(path_copy, path_env);
 
 cmd_len = strlen(command);
 dir = strtok(path_copy, ":");
@@ -155,3 +162,4 @@ dir = strtok(NULL, ":");
 free(path_copy);
 return NULL;
 }
+
