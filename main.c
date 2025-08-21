@@ -1,6 +1,6 @@
 #include "shell.h"
 
-void execute_command(char **args, char *prog_name)
+int execute_command(char **args, char *prog_name)
 {
 pid_t pid;
 int status;
@@ -11,7 +11,7 @@ if (!command_path)
 {
 fprintf(stderr, "%s: 1: %s: not found\n", prog_name, args[0]);
 fflush(stderr);
-exit(127);
+return 127;
 }
 
 pid = fork();
@@ -19,7 +19,7 @@ if (pid == -1)
 {
 perror("fork");
 free(command_path);
-return;
+return 1;
 }
 
 if (pid == 0)
@@ -38,12 +38,9 @@ waitpid(pid, &status, WUNTRACED);
 } while (!WIFEXITED(status) && !WIFSIGNALED(status));
 
 if (WIFEXITED(status))
-{
-status = WEXITSTATUS(status);
-if (status != 0)
-exit(status);
+return WEXITSTATUS(status);
 }
-}
+return 0;
 }
 
 int main(int argc, char **argv)
@@ -51,6 +48,7 @@ int main(int argc, char **argv)
 char *command;
 char *prog_name = argv[0];
 char **args;
+int exit_status;
 
 (void)argc;
 signal(SIGINT, SIG_IGN);
@@ -96,10 +94,13 @@ free(command);
 break;
 }
 
-execute_command(args, prog_name);
+exit_status = execute_command(args, prog_name);
 
 free(args);
 free(command);
+
+if (exit_status != 0)
+exit(exit_status);
 }
 
 return 0;
