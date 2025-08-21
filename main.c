@@ -36,6 +36,13 @@ free(command_path);
 do {
 waitpid(pid, &status, WUNTRACED);
 } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+
+if (WIFEXITED(status))
+{
+status = WEXITSTATUS(status);
+if (status != 0)
+exit(status);
+}
 }
 }
 
