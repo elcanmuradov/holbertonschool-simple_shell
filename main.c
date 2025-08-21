@@ -49,6 +49,7 @@ char *command;
 char *prog_name = argv[0];
 char **args;
 int exit_status;
+int i;
 
 (void)argc;
 signal(SIGINT, SIG_IGN);
@@ -92,6 +93,17 @@ if (strcmp(args[0], "exit") == 0)
 free(args);
 free(command);
 break;
+}
+
+if (strcmp(args[0], "env") == 0)
+{
+for (i = 0; environ[i]; i++)
+{
+printf("%s\n", environ[i]);
+}
+free(args);
+free(command);
+continue;
 }
 
 exit_status = execute_command(args, prog_name);
